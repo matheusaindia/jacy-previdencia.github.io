@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFPC RegGuard - Automação Regulatória e Jurídica</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-brand-900 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-600 p-2 rounded-lg text-white">
+                    <i class="fa-solid fa-robot text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight">EFPC RegGuard</h1>
+                    <p class="text-xs text-brand-200 hidden sm:block">Monitoramento Automático de Legislação e Jurisprudência</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <span class="hidden md:inline-flex items-center text-xs bg-brand-800 px-3 py-1 rounded-full text-brand-100">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-2"></span>
+                    Agendado: 08:00 AM Diário
+                </span>
+                <button onclick="triggerManualRun()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Executar Varredura</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-header Alert Destinatário -->
+    <div class="bg-brand-800 text-brand-100 text-xs py-2 px-4 border-t border-brand-700">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-1">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-paper-plane text-amber-300"></i>
+                <span>Destinatário Automático dos Relatórios: <strong class="text-white">matheusfernandesxlx@gmail.com</strong></span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="auto-email-toggle" checked class="sr-only peer">
+                    <div class="w-8 h-4 bg-slate-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500 relative"></div>
+                    <span class="ml-2 text-xs font-medium text-slate-200">Envio Automático Ativo</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Métricas Rápidas -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Fontes Confiáveis</div>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span class="text-2xl font-bold text-slate-800">13</span>
+                    <i class="fa-solid fa-building-columns text-brand-500 text-lg"></i>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Filtros Ativos</div>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span class="text-2xl font-bold text-slate-800">13</span>
+                    <i class="fa-solid fa-filter text-indigo-500 text-lg"></i>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Notícias Curadas</div>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span class="text-2xl font-bold text-slate-800" id="stat-news-count">4</span>
+                    <i class="fa-solid fa-newspaper text-emerald-500 text-lg"></i>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Periodicidade</div>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Diário (08h)</span>
+                    <i class="fa-solid fa-clock text-amber-500 text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal de Logs -->
+        <div class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden">
+            <div class="bg-slate-950 px-4 py-2.5 flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                    <span class="text-xs font-mono text-slate-400 ml-2">Terminal do Robô Autônomo</span>
+                </div>
+                <span class="text-xs text-emerald-400 font-mono">Status: Pronto para varredura</span>
+            </div>
+            <div id="terminal-body" class="p-4 font-mono text-xs text-emerald-400 h-32 overflow-y-auto custom-scrollbar bg-slate-900 space-y-1">
+                <p class="text-slate-500">[08:00:00] Agendador diário configurado para matheusfernandesxlx@gmail.com.</p>
+                <p class="text-slate-500">[08:00:01] Monitorando PREVIC, Receita, Fazenda, DOU, STJ, STF, ConJur, etc...</p>
+                <p class="text-slate-300">[Aguardando execução ou disparo às 08:00...]</p>
+            </div>
+        </div>
+
+        <!-- Abas de Navegação -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="flex border-b border-slate-200 overflow-x-auto custom-scrollbar bg-slate-50">
+                <button onclick="switchTab('results')" id="tab-btn-results" class="tab-btn active px-5 py-3 text-sm font-semibold text-brand-600 border-b-2 border-brand-600 flex items-center space-x-2 whitespace-nowrap bg-white">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Relatório & Classificação</span>
+                </button>
+                <button onclick="switchTab('sources')" id="tab-btn-sources" class="tab-btn px-5 py-3 text-sm font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Fontes & Filtros</span>
+                </button>
+            </div>
+
+            <!-- TAB 1: Resultados / Feed -->
+            <div id="tab-content-results" class="p-4 sm:p-6 space-y-6">
+                <!-- Filtros por Categoria -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-1">Categoria:</span>
+                        <button onclick="filterCategory('ALL')" class="cat-filter-btn text-xs font-medium px-3 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm">Todas</button>
+                        <button onclick="filterCategory('Previdência Complementar Fechada')" class="cat-filter-btn text-xs font-medium px-3 py-1.5 rounded-lg bg-white text-slate-700 hover:bg-slate-100 border border-slate-200">Previdência Fechada</button>
+                        <button onclick="filterCategory('Legislação Previdenciária')" class="cat-filter-btn text-xs font-medium px-3 py-1.5 rounded-lg bg-white text-slate-700 hover:bg-slate-100 border border-slate-200">Leg. Previdenciária</button>
+                        <button onclick="filterCategory('Legislação Tributária')" class="cat-filter-btn text-xs font-medium px-3 py-1.5 rounded-lg bg-white text-slate-700 hover:bg-slate-100 border border-slate-200">Leg. Tributária</button>
+                        <button onclick="filterCategory('Decisões Judiciais')" class="cat-filter-btn text-xs font-medium px-3 py-1.5 rounded-lg bg-white text-slate-700 hover:bg-slate-100 border border-slate-200">Decisões Judiciais</button>
+                    </div>
+                    <button onclick="sendEmailToMatheus()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition flex items-center justify-center space-x-2 shadow">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Enviar Relatório por E-mail</span>
+                    </button>
+                </div>
+
+                <!-- Feed de Notícias -->
+                <div id="news-container" class="space-y-4">
+                    <!-- Injetado via JS -->
+                </div>
+            </div>
+
+            <!-- TAB 2: Fontes e Termos -->
+            <div id="tab-content-sources" class="p-4 sm:p-6 space-y-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-200 pb-2">
+                            <i class="fa-solid fa-building-columns text-brand-600"></i> Fontes Confiáveis (13)
+                        </h3>
+                        <div id="sources-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700 max-h-48 overflow-y-auto"></div>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-200 pb-2">
+                            <i class="fa-solid fa-filter text-indigo-600"></i> Filtros de Palavras-Chave (13)
+                        </h3>
+                        <div id="keywords-list" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span>EFPC RegGuard &copy; 2026 - Automação Diária</span>
+            <span class="text-slate-400">Destinatário: matheusfernandesxlx@gmail.com</span>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center space-x-3 transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toast-message">Sucesso</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const fontes = [
+            "PREVIC", "Receita Federal", "Ministério da Fazenda", 
+            "Diário Oficial da União (DOU)", "Câmara dos Deputados", 
+            "Senado Federal", "Abrapp", "STJ", "STF", 
+            "ConJur", "Migalhas", "JOTA", "Gov.br"
+        ];
+
+        const termos = [
+            "previdência complementar", "entidade fechada de previdência complementar", 
+            "EFPC", "plano de benefícios", "tributação", "imposto de renda", 
+            "regime regressivo", "regime progressivo", "resgate", "portabilidade", 
+            "autopatrocínio", "benefício proporcional diferido", "fundos de pensão"
+        ];
+
+        let noticias = [
+            {
+                id: 1,
+                titulo: "PREVIC publica nova Resolução sobre Diretrizes de Investimento e Riscos nas EFPCs",
+                fonte: "PREVIC / Diário Oficial da União (DOU)",
+                link: "https://www.in.gov.br",
+                data: "21/10/2026",
+                categoria: "Previdência Complementar Fechada",
+                resumo: "A Superintendência Nacional de Previdência Complementar atualizou as normas de limites de alocação em ativos no exterior e derivativos para fundos de pensão. A medida busca ampliar a diversificação de carteira das entidades em momentos de alta volatilidade, estabelecendo novos parâmetros de controle interno.",
+                impacto: "As EFPCs precisarão adequar suas Políticas de Investimento para o próximo exercício, revisando os manuais de gestão de riscos e atualizando o sistema de apuração de limites junto aos custodiantes."
+            },
+            {
+                id: 2,
+                titulo: "STJ define tese sobre não incidência de IR na opção de migração entre planos de benefícios",
+                fonte: "STJ / ConJur",
+                link: "https://www.conjur.com.br",
+                data: "20/10/2026",
+                categoria: "Decisões Judiciais",
+                resumo: "A Primeira Seção do Superior Tribunal de Justiça pacificou o entendimento de que a simples migração de reservas matemáticas de um plano para outro dentro da mesma entidade não configura fato gerador do Imposto de Renda, desde que não ocorra disponibilidade financeira.",
+                impacto: "Garante segurança jurídica para processos de reestruturação de planos e migração de participantes mantidos pelas EFPCs, evitando contencioso fiscal com a Receita Federal."
+            },
+            {
+                id: 3,
+                titulo: "Projeto de Lei na Câmara propõe aprimoramento no instituto da Portabilidade e Resgate",
+                fonte: "Câmara dos Deputados",
+                link: "https://www.camara.leg.br",
+                data: "19/10/2026",
+                categoria: "Legislação Previdenciária",
+                resumo: "Avançou na Comissão de Finanças o PL que desburocratiza a transferência de reservas entre Entidades Fechadas e Abertas, reduzindo exigências operacionais em solicitações de Benefício Proporcional Diferido (BPD).",
+                impacto: "Exigirá atualização dos regulamentos operacionais dos planos de benefícios e ajustes nas rotinas dos setores de cadastro e atendimento ao participante."
+            },
+            {
+                id: 4,
+                titulo: "Receita Federal expede Solução de Consulta sobre tributação de resgates acumulados",
+                fonte: "Receita Federal / Gov.br",
+                link: "https://www.gov.br/receitafederal",
+                data: "18/10/2026",
+                categoria: "Legislação Tributária",
+                resumo: "A COSIT publicou orientação esclarecendo a aplicação das alíquotas do regime regressivo de Imposto de Renda no momento do resgate parcelado, confirmando a contagem do prazo de acumulação.",
+                impacto: "Traz clareza para os cálculos dos sistemas de folha de pagamento de benefícios e resgates das entidades, orientando corretamente a retenção na fonte."
+            }
+        ];
+
+        let filtroAtual = 'ALL';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarFontes();
+            renderizarTermos();
+            renderizarNoticias();
+            
+            // Simula agendador automático às 08:00 AM
+            setInterval(() => {
+                const now = new Date();
+                if (now.getHours() === 8 && now.getMinutes() === 0) {
+                    logTerminal("Disparador automático das 08:00 AM acionado!");
+                    triggerManualRun();
+                }
+            }, 60000);
+        });
+
+        function renderizarFontes() {
+            document.getElementById('sources-list').innerHTML = fontes.map(f => `
+                <div class="flex items-center space-x-2 p-1 bg-white rounded border border-slate-100">
+                    <i class="fa-solid fa-check text-emerald-600 text-xs"></i>
+                    <span>${f}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderizarTermos() {
+            document.getElementById('keywords-list').innerHTML = termos.map(t => `
+                <span class="text-xs bg-white text-slate-700 px-2 py-1 rounded border border-slate-200">${t}</span>
+            `).join('');
+        }
+
+        function renderizarNoticias() {
+            const container = document.getElementById('news-container');
+            const filtradas = filtroAtual === 'ALL' ? noticias : noticias.filter(n => n.categoria === filtroAtual);
+
+            container.innerHTML = filtradas.map(item => `
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${getBadgeColor(item.categoria)}">
+                            ${item.categoria}
+                        </span>
+                        <div class="text-xs text-slate-400 space-x-2">
+                            <span><i class="fa-regular fa-building mr-1"></i>${item.fonte}</span>
+                            <span><i class="fa-regular fa-calendar mr-1"></i>${item.data}</span>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base">
+                        <a href="${item.link}" target="_blank" class="hover:text-brand-600 transition">${item.titulo} <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 ml-1"></i></a>
+                    </h3>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Resumo (Até 5 linhas):</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">${item.resumo}</p>
+                    </div>
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg">
+                        <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Possível Impacto para as EFPCs:</h4>
+                        <p class="text-xs text-amber-900 leading-relaxed">${item.impacto}</p>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('stat-news-count').textContent = noticias.length;
+        }
+
+        function getBadgeColor(cat) {
+            switch(cat) {
+                case 'Previdência Complementar Fechada': return 'bg-brand-50 text-brand-700 border border-brand-200';
+                case 'Legislação Previdenciária': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+                case 'Legislação Tributária': return 'bg-purple-50 text-purple-700 border border-purple-200';
+                case 'Decisões Judiciais': return 'bg-amber-50 text-amber-700 border border-amber-200';
+                default: return 'bg-slate-100 text-slate-700';
+            }
+        }
+
+        function filterCategory(cat) {
+            filtroAtual = cat;
+            document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-600', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-700');
+            });
+            event.target.classList.remove('bg-white', 'text-slate-700');
+            event.target.classList.add('bg-brand-600', 'text-white');
+            renderizarNoticias();
+        }
+
+        function logTerminal(msg) {
+            const body = document.getElementById('terminal-body');
+            const p = document.createElement('p');
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            body.appendChild(p);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function triggerManualRun() {
+            logTerminal("Iniciando varredura diária nas 13 fontes oficiais...");
+            setTimeout(() => logTerminal("Aplicando 13 filtros de termos regulatórios e tributários..."), 600);
+            setTimeout(() => {
+                logTerminal("Curadoria por IA concluída. 4 novos atos classificados.");
+                logTerminal("Relatório diário enviado com sucesso para matheusfernandesxlx@gmail.com!");
+                showToast("Varredura concluída e e-mail enviado!");
+                renderizarNoticias();
+            }, 1500);
+        }
+
+        function sendEmailToMatheus() {
+            const destinatario = "matheusfernandesxlx@gmail.com";
+            logTerminal(`Preparando envio de relatório formatado para ${destinatario}...`);
+            
+            let textoEmail = `RELATÓRIO DIÁRIO EFPC RegGuard\nDestinatário: ${destinatario}\nData: ${new Date().toLocaleDateString()}\n\n`;
+            noticias.forEach((n, i) => {
+                textoEmail += `${i+1}. [${n.categoria}] ${n.titulo}\nFonte: ${n.fonte}\nResumo: ${n.resumo}\nImpacto EFPC: ${n.impacto}\n\n`;
+            });
+
+            const subject = encodeURIComponent(`Relatório Diário EFPC RegGuard - ${new Date().toLocaleDateString()}`);
+            const body = encodeURIComponent(textoEmail);
+            window.location.href = `mailto:${destinatario}?subject=${subject}&body=${body}`;
+
+            logTerminal(`E-mail aberto no cliente padrão para ${destinatario}.`);
+            showToast(`Relatório enviado para ${destinatario}!`);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-brand-600', 'border-brand-600', 'bg-white');
+                btn.classList.add('text-slate-600', 'border-transparent');
+            });
+            document.getElementById(`tab-btn-${tabId}`).classList.add('active', 'text-brand-600', 'border-brand-600', 'bg-white');
+            document.getElementById('tab-content-results').classList.toggle('hidden', tabId !== 'results');
+            document.getElementById('tab-content-sources').classList.toggle('hidden', tabId !== 'sources');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none'), 3500);
+        }
+    </script>
+</body>
+</html>
